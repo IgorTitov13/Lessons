@@ -2,19 +2,22 @@ import pandas as pd
 
 outpath='/Users/igortitov/mod_b/metro_nielsen/ready/'
 
+# берем файл от клиента
 print('начали читать файл с отчетом')
 df1 = pd.read_excel(io='/Users/igortitov/mod_b/metro_nielsen/incomming/Total Mixed Chains ST.xlsx', header=0, dtype='str')
 print('прочитали файл с отчетом')
 
+# берем базу ШК
 print('начали читать базу шк')
 df2 = pd.read_excel(io='/Users/igortitov/mod_b/metro_nielsen/base/FNF_base.xlsx', header=0, dtype='str')
 print('прочитали базу шк')
+
+# начинаем метчить клиентский файл с базой ШК
 print('начали мерджить строки')
 df3 = df1.merge(df2,left_on='EAN',right_on='sell_ean_no',how='left')
-# df3.to_csv(outpath+'merged.csv')
-# df3=pd.read_csv(outpath+'merged.csv')
 print('смерджили строки')
 
+# меняем числовые форматы в нужных колонках
 num_cols=['MAT LY','MAT TY','Jun 2019','Jul 2019','Aug 2019','Sep 2019','Oct 2019','Nov 2019','Dec 2019','Jan 2020','Feb 2020','Mar 2020','Apr 2020','May 2020']
 int_cols=['sell_ean_no', 'art_no', 'subsys_art_no', 'group_art','EAN']
 
@@ -26,6 +29,7 @@ for col in num_cols+int_cols:
         print(col, 'cant cast to num!!!')
         exit()
 print(df3.info())
+
 for col in int_cols:
     print('начинаем менять формат инт',col)
     try:
@@ -34,6 +38,7 @@ for col in int_cols:
         print(col, 'cant cast to int!!!')
 print(df3.info())
 
+# дедупликация полученного массива
 def dedouble(df3):
     dedouble_list = ['PRODUCT NAME','MAT LY','MAT TY','Jun 2019','Jul 2019','Aug 2019','Sep 2019','Oct 2019','Nov 2019','Dec 2019','Jan 2020','Feb 2020','Mar 2020','Apr 2020','May 2020']
     rsize=df3.shape[0]
@@ -45,6 +50,7 @@ def dedouble(df3):
 
 ready = dedouble(df3)
 
+# записываем в эксель
 def write(dflist):
     print('\n   начало функции write')
     # , options={'strings_to_urls': False}
